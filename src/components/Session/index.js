@@ -1,11 +1,5 @@
-import React, { Component } from 'react'
+import AuthUserContext from './context';
+import withAuthentication from './withAuthentication';
+import withAuthorization from './withAuthorization';
 
-export default class index extends Component {
-  render() {
-    return (
-      <div>
-        
-      </div>
-    )
-  }
-}
+export {AuthUserContext, withAuthentication, withAuthorization};

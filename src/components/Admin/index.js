@@ -1,11 +1,16 @@
-import React, { Component } from 'react'
+import React from 'react'
+import * as ROLES from '../../constants/roles';
+import { withAuthorization } from '../Session';
 
-export default class index extends Component {
-  render() {
-    return (
-      <div>
-        
-      </div>
-    )
-  }
-}
+const AdminPage = () => (
+  <div> 
+    <h1>Admin</h1>
+    <p>
+      Restricted!
+    </p>
+  </div>
+)
+
+const condition = authUser => authUser && Boolean(authUser.roles[ROLES.ADMIN]);
+
+export default withAuthorization(AdminPage, condition)
