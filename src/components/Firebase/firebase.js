@@ -18,6 +18,9 @@ class Firebase {
 
     this.auth = app.auth();
     this.db = app.firestore();
+    this.googleProvider = new app.auth.GoogleAuthProvider();
+    this.facebookProvider = new app.auth.FacebookAuthProvider();
+    this.emailAuthProvider = app.auth.EmailAuthProvider;
   }
 
   // *** AUTH API ***
@@ -30,8 +33,11 @@ class Firebase {
     return this.auth.signInWithEmailAndPassword(email, password);
   }
 
+  signInWithGoogle = () => this.auth.signInWithPopup(this.googleProvider);
+
+  signInWithFacebook = () => this.auth.signInWithPopup(this.facebookProvider);
+
   signOut = () => {
-    console.log(this.auth.signOut)
     return this.auth.signOut().then(function() {
       console.log('Signed Out');
     }, function(error) {
@@ -43,11 +49,38 @@ class Firebase {
 
   updatePassword = password => this.auth.currentUser.updatePassword(password);
 
+  // *** Merge Auth and DB User API *** //
+
+  onAuthUserListener = (next, fallback) => {
+    return this.auth.onAuthStateChanged(authUser => {
+      if (authUser) {
+        this.user(authUser.uid).get()
+          .then(doc => {
+            const dbUser = doc.data();
+
+            if (!dbUser.roles) {
+              dbUser.roles = [];
+            }
+
+            authUser = {
+              uid: authUser.uid,
+              email: authUser.email,
+              ...dbUser,
+            };
+
+            next(authUser)
+          });
+      } else {
+        fallback();
+      }
+    })
+  }
+
   // *** USER API ***
 
-  user = uid => this.db.ref(`users${uid}`);
+  user = uid => this.db.collection('users').doc(uid);
 
-  users = () => this.db.ref('users');
+  users = () => this.db.collection('users');
 }
 
 export default Firebase;

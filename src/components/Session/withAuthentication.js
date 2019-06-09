@@ -8,13 +8,21 @@ const withAuthentication = Component => {
       super(props);
 
       this.state = {
-        authUser: null,
+        authUser: JSON.parse(sessionStorage.getItem('authUser')),
       };
     }
 
     componentDidMount() {
-      this.listener = this.props.firebase.auth
-        .onAuthStateChanged(authUser => {this.setState({authUser})})
+      this.listener = this.props.firebase.onAuthUserListener(
+        authUser => {
+          sessionStorage.setItem('authUser', JSON.stringify(authUser));
+          this.setState({authUser})
+        },
+        () => {
+          sessionStorage.removeItem('authUser')
+          this.setState({authUser: null})
+        }
+      )
     }
   
     componentWillUnmount() {
